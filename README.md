@@ -45,8 +45,7 @@ Navigate to any video content on supported platforms
 Activate the detector using one of these methods:
 
 Click the Deepfake Detector icon in your browser toolbar
-Right-click on a video and select "Analyze for Deepfakes"
-Enable auto-scan in settings for automatic detection
+Click on the button on the extension to trigger the analysis, or use the keyboard shortcut to analyse a video
 
 
 View results that appear as:
@@ -60,20 +59,9 @@ Simple red/green indicator icon
 Understanding Results
 
 Green Indicator: Video appears authentic
-Yellow Indicator: Uncertain/requires manual review
 Red Indicator: Potential deepfake detected
 
-Settings Configuration
-Access extension settings by:
 
-Right-clicking the extension icon
-Selecting "Options" or "Settings"
-Configure your preferences:
-
-Activation method
-Auto-scan settings
-Result display preferences
-Technical detail level
 
 
 
@@ -91,6 +79,8 @@ Most HTML5 video players
 
 Browser: Chrome 88+ or Chromium-based browsers
 Internet Connection: Required for API processing
+
+
 Permissions:
 
 Access to video content on websites
@@ -131,19 +121,14 @@ Extension icon not visible:
 Check if the extension is enabled in chrome://extensions/
 Pin the extension to your toolbar for easy access
 
-Getting Help
-If you encounter issues:
 
-Check our FAQ section
-Report bugs through the Issues page
-Contact support: support@deepfakedetector.com
 
 📊 Performance
 
 Detection Accuracy: 95%+ on tested deepfake samples
 Processing Speed: 5-10 seconds average
 Platform Coverage: 6+ major social media platforms
-Daily Users: 10,000+ active users
+
 
 🤝 Contributing
 We welcome contributions! Please see our Contributing Guidelines for details on:
@@ -153,34 +138,9 @@ Suggesting features
 Code contributions
 Documentation improvements
 
-📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
-🔄 Version History
-v1.2.0 (Current)
 
-Added TikTok support
-Improved detection accuracy
-Enhanced user interface
-Bug fixes and performance improvements
 
-v1.1.0
 
-Added automatic scanning feature
-Improved result display options
-Added technical details view
-
-v1.0.0
-
-Initial release
-Basic deepfake detection
-Support for major platforms
-
-📞 Support
-
-Email: support@deepfakedetector.com
-Documentation: docs.deepfakedetector.com
-Community: Discord Server
-Updates: Follow us on Twitter
 
 ⚠️ Disclaimer
 Deepfake Detector is a detection tool that provides assessments based on current AI technology. While highly accurate, no detection system is 100% perfect. Users should use this tool as one factor in evaluating content authenticity and apply critical thinking when consuming online media.
