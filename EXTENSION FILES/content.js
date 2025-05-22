@@ -1,10 +1,10 @@
 // DeepFake Detector Content Script
 const API_URL = 'https://deepfake-detector-106176227689.us-central1.run.app';
-// Track active notifications
+// Tracking active notifications
 let activeNotification = null;
 let resultOverlay = null;
 
-// Listen for messages from background script
+// Listening for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("Content script received message:", request);
   
@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   else if (request.action === "analyzeCurrentVideo") {
-    // Forward the request to the background script with current URL
+    // Forwarding the request to the background script with current URL
     chrome.runtime.sendMessage({
       action: "analyzeCurrentVideo",
       url: window.location.href
@@ -32,17 +32,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function showNotification(type, message) {
   console.log(`Showing notification: ${type} - ${message}`);
   
-  // Remove existing notification if any
+  // Removing existing notification if any, in order to show new notifications
   if (activeNotification) {
     activeNotification.remove();
     activeNotification = null;
   }
   
-  // Create notification element
+  // Creating notification element
   const notification = document.createElement('div');
   notification.className = 'deepfake-detector-notification';
   
-  // Add appropriate class based on type
+  // Adding appropriate class based on type
   if (type === "error") {
     notification.classList.add('error');
   } else if (type === "progress") {
@@ -53,11 +53,11 @@ function showNotification(type, message) {
     notification.classList.add('info');
   }
   
-  // Create content
+  // Creating content
   const icon = document.createElement('div');
   icon.className = 'notification-icon';
   
-  // Set icon based on type
+  // Setting icon based on type of notification
   if (type === "error") {
     icon.innerHTML = '⚠️';
   } else if (type === "progress") {
@@ -72,7 +72,7 @@ function showNotification(type, message) {
   content.className = 'notification-content';
   content.textContent = message;
   
-  // Add close button
+  // Adding a close button
   const closeBtn = document.createElement('button');
   closeBtn.className = 'notification-close';
   closeBtn.innerHTML = '×';
@@ -81,16 +81,16 @@ function showNotification(type, message) {
     activeNotification = null;
   });
   
-  // Assemble notification
+  // Assembling the notification
   notification.appendChild(icon);
   notification.appendChild(content);
   notification.appendChild(closeBtn);
   
-  // Add to page
+  // Adding to page
   document.body.appendChild(notification);
   activeNotification = notification;
   
-  // Auto-hide after delay (except for errors)
+  // Auto-hide the notification after some delay 
   if (type !== "error") {
     setTimeout(() => {
       if (notification && notification.parentNode) {
@@ -108,19 +108,18 @@ function showNotification(type, message) {
   }
 }
 
-// Show detailed result overlay
-// Show detailed result overlay
-// Show detailed result overlay
+
+// Showing the detailed result as an overlay menu
 function showResultOverlay(result) {
   console.log("Showing result overlay:", result);
   
-  // Remove existing overlay if any
+  // Removing existing overlay menu if any
   if (resultOverlay) {
     resultOverlay.remove();
     resultOverlay = null;
   }
   
-  // Handle API error responses
+  // Handling API error responses
   if (result.error) {
     showNotification("error", `Analysis failed: ${result.error}`);
     return;
@@ -128,7 +127,7 @@ function showResultOverlay(result) {
   
   const isDeepfake = result.deepfake;
   
-  // Create overlay container
+  // Creating overlay menu container
   const overlay = document.createElement('div');
   overlay.className = 'deepfake-detector-result';
   
@@ -138,7 +137,7 @@ function showResultOverlay(result) {
     overlay.classList.add('authentic');
   }
   
-  // Create header
+  // Creating a header
   const header = document.createElement('div');
   header.className = 'result-header';
   
@@ -152,7 +151,7 @@ function showResultOverlay(result) {
   header.appendChild(icon);
   header.appendChild(title);
   
-  // Create close button
+  // Creating a close button
   const closeBtn = document.createElement('button');
   closeBtn.className = 'result-close';
   closeBtn.innerHTML = '×';
@@ -163,15 +162,15 @@ function showResultOverlay(result) {
   
   header.appendChild(closeBtn);
   
-  // Create content
+  // Creating content
   const content = document.createElement('div');
   content.className = 'result-content';
   
-  // Analysis details
+  // Analysis results details
   const detailsSection = document.createElement('div');
   detailsSection.className = 'details-section';
   
-  // Frames analyzed
+  // For details on the frames that were  analyzed
   const framesRow = document.createElement('div');
   framesRow.className = 'detail-row';
   
@@ -186,10 +185,10 @@ function showResultOverlay(result) {
   framesRow.appendChild(framesLabel);
   framesRow.appendChild(framesValue);
   
-  // Add frames analyzed to details section
+  // Adding frames analyzed to details section
   detailsSection.appendChild(framesRow);
   
-  // Add processing time to details section (FIXED)
+  // Adding processing time to details section 
   if (result.processingTime) {
     const timeRow = document.createElement('div');
     timeRow.className = 'detail-row';
@@ -209,7 +208,7 @@ function showResultOverlay(result) {
     detailsSection.appendChild(timeRow);
   }
   
-  // Add API processing time if available (FIXED)
+  // Adding the  API processing time if available 
   if (result.apiResponseTime) {
     const apiTimeRow = document.createElement('div');
     apiTimeRow.className = 'detail-row';
@@ -229,7 +228,7 @@ function showResultOverlay(result) {
     detailsSection.appendChild(apiTimeRow);
   }
   
-  // Add summary/explanation
+  // Adding  summary/explanation to the overlay menu
   const summary = document.createElement('div');
   summary.className = 'result-summary';
   
@@ -245,12 +244,12 @@ function showResultOverlay(result) {
     `;
   }
   
-  // Assemble content
+  // Assembling all the  content
   content.appendChild(detailsSection);
   content.appendChild(summary);
   
-  // ========== ADD FEEDBACK SECTION HERE ==========
-  // Add feedback buttons
+  // ========== ADDING FEEDBACK SECTION HERE ==========
+  // Adding feedback buttons
   const feedbackSection = document.createElement('div');
   feedbackSection.className = 'feedback-section';
   
@@ -279,14 +278,14 @@ function showResultOverlay(result) {
   feedbackSection.appendChild(notSureBtn);
   
   content.appendChild(feedbackSection);
-  // ========== END FEEDBACK SECTION ==========
+  // ========== ENDING OF FEEDBACK SECTION ==========
   
-  // Add help text
+  // Adding help text, if users want to reach out for assistance
   const helpText = document.createElement('div');
   helpText.className = 'help-text';
   helpText.textContent = 'Analysis powered by DeepFake Detector';
   
-  // Add CSS styles for timing section and feedback
+  // Adding CSS styles for timing section and feedback
   const style = document.createElement('style');
   style.textContent = `
     .detail-row {
@@ -351,19 +350,19 @@ function showResultOverlay(result) {
   `;
   document.head.appendChild(style);
   
-  // Assemble overlay
+  // Assembling overlay
   overlay.appendChild(header);
   overlay.appendChild(content);
   overlay.appendChild(helpText);
   
-  // Add to page
+  // Adding to page
   document.body.appendChild(overlay);
   resultOverlay = overlay;
   
-  // Make overlay draggable
+  // Making the  overlay menu draggable
   makeDraggable(overlay, header);
   
-  // Add keyboard shortcut to close (Escape key)
+  // Adding keyboard shortcut to close 
   const handleEscKey = (e) => {
     if (e.key === 'Escape' && resultOverlay) {
       resultOverlay.remove();
@@ -374,51 +373,51 @@ function showResultOverlay(result) {
   
   document.addEventListener('keydown', handleEscKey);
   
-  // Log the timing info to console for debugging
+  // Logging the timing info to console for debugging
   console.log("Result timing info:", {
     processingTime: result.processingTime,
     apiResponseTime: result.apiResponseTime
   });
 }
 
-// Replace the provideFeedback function with this updated version
+// provideFeedback function to allow users to give feedback
 function provideFeedback(result, wasCorrect, userCorrection) {
   console.log("Providing feedback:", { wasCorrect, userCorrection });
   
-  // Create frameIds array from any available sources
+  // Creating frameIds array 
   let frameIds = [];
   
-  // Try to get frameIds from result if they exist
+  // Trying to get frameIds from result if they exist
   if (result.frameIds) {
     frameIds = result.frameIds;
   } 
-  // Or try to extract them from frames_data if available
+  // Extracting frameIds from frames_data if available
   else if (result.frames_data && Array.isArray(result.frames_data)) {
     // If we have frames_data but no frameIds, we'll need to notify the user
     // that their feedback will be recorded but frames won't be saved for training
     console.log("Warning: No frameIds available for feedback, only feedback will be recorded");
   }
   
-  // Prepare the feedback data in a format that matches the backend expectations
+  // Preparing the feedback data in a format that matches the backend expectations
   const feedbackData = {
     timestamp: Date.now(),
-    // Include both nested result and direct fields for robustness
+   
     result: {
       deepfake: result.deepfake,
       confidence: result.confidence
     },
-    // Also include direct fields
+   
     deepfake: result.deepfake,
     confidence: result.confidence,
     wasCorrect: wasCorrect,
     frameIds: frameIds,
-    userCorrection: userCorrection, // Can be true, false, or null (for "Not Sure")
-    source: window.location.hostname // Add source information
+    userCorrection: userCorrection, 
+    source: window.location.hostname 
   };
   
   console.log("Sending feedback data:", feedbackData);
   
-  // Send to your server for continuous learning
+  // Sending frames with feedback to the server for continuous learning
   fetch(API_URL + '/feedback', {
     method: 'POST',
     headers: {
@@ -442,7 +441,7 @@ function provideFeedback(result, wasCorrect, userCorrection) {
       
       showNotification("info", message);
       
-      // If the feedback section is in the current overlay, update it
+
       if (resultOverlay) {
         const feedbackSection = resultOverlay.querySelector('.feedback-section');
         if (feedbackSection) {
@@ -461,46 +460,46 @@ function provideFeedback(result, wasCorrect, userCorrection) {
 
 
 
-// Make element draggable
+// Making the overlay menu draggable
 function makeDraggable(element, handle) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   
   if (handle) {
-    // If present, the handle is where you move the element from
+  
     handle.style.cursor = 'move';
     handle.onmousedown = dragMouseDown;
   } else {
-    // Otherwise, move the element from anywhere inside it
+ 
     element.onmousedown = dragMouseDown;
   }
 
   function dragMouseDown(e) {
     e = e || window.event;
     e.preventDefault();
-    // Get the mouse cursor position at startup
+  
     pos3 = e.clientX;
     pos4 = e.clientY;
     document.onmouseup = closeDragElement;
-    // Call a function whenever the cursor moves
+  
     document.onmousemove = elementDrag;
   }
 
   function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
-    // Calculate the new cursor position
+    // Calculating the new cursor position
     pos1 = pos3 - e.clientX;
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    // Set the element's new position
+    // Setting the element's new position
     element.style.top = (element.offsetTop - pos2) + "px";
     element.style.left = (element.offsetLeft - pos1) + "px";
-    element.style.transform = 'none'; // Clear transform to allow manual positioning
+    element.style.transform = 'none'; 
   }
 
   function closeDragElement() {
-    // Stop moving when mouse button is released
+
     document.onmouseup = null;
     document.onmousemove = null;
   }

@@ -3,20 +3,20 @@
 // API endpoint
 const API_URL = 'https://deepfake-detector-106176227689.us-central1.run.app';
 
-// Keep track of analysis history
+// Keeping track of analysis history
 let analysisHistory = [];
 
 // Separate function to register context menus
 function registerContextMenus() {
-  // First remove any existing menus to prevent duplicates
+  // Removing any existing menus to prevent duplicates
   chrome.contextMenus.removeAll(() => {
     console.log("Cleared existing context menus");
     
-    // Create a single context menu item that appears for videos and pages
+    // Creating a single context menu item that appears for videos and pages
     chrome.contextMenus.create({
       id: "analyze-media",
       title: "Check for Deepfake",
-      contexts: ["video", "page"] // This will show on both videos and pages
+      contexts: ["video", "page"] 
     }, function() {
       if (chrome.runtime.lastError) {
         console.error("Error creating menu:", chrome.runtime.lastError.message);
@@ -29,31 +29,30 @@ function registerContextMenus() {
 
 function sendMessageToTab(tabId, message) {
   return new Promise((resolve, reject) => {
-    // First validate the tab ID
     if (!tabId) {
       console.warn("Cannot send message - no valid tab ID provided");
       return reject(new Error("No valid tab ID"));
     }
     
-    // Check if the tab exists first
+    // Checking if the tab exists first
     chrome.tabs.get(tabId, (tab) => {
       if (chrome.runtime.lastError) {
         console.warn(`Tab ${tabId} doesn't exist:`, chrome.runtime.lastError.message);
         return reject(new Error(`Tab ${tabId} doesn't exist`));
       }
       
-      // Now try to send the message
+    
       chrome.tabs.sendMessage(tabId, message, response => {
         if (chrome.runtime.lastError) {
-          // This could be because content script isn't loaded yet
+     
           console.log(`Message failed, will try injecting content script first: ${chrome.runtime.lastError.message}`);
           
-          // Try to inject the content script and then retry sending the message
+      
           chrome.scripting.executeScript({
             target: { tabId },
             files: ['content.js']
           }).then(() => {
-            // Give the content script a moment to initialize
+            // Giving the content script a moment to initialize
             setTimeout(() => {
               chrome.tabs.sendMessage(tabId, message, secondResponse => {
                 if (chrome.runtime.lastError) {
@@ -69,7 +68,7 @@ function sendMessageToTab(tabId, message) {
             reject(err);
           });
         } else {
-          // Message sent successfully
+  
           resolve(response);
         }
       });
@@ -77,11 +76,9 @@ function sendMessageToTab(tabId, message) {
   });
 }
 
-// Register context menus when extension is installed
+// Registering context menus when extension is installed
 chrome.runtime.onInstalled.addListener(() => {
   console.log("DeepFake Detector extension installed");
-  
-  // Register context menus
   registerContextMenus();
   
  
@@ -94,13 +91,13 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// Register context menus when browser starts
+// Registering context menus when browser starts
 chrome.runtime.onStartup.addListener(() => {
   console.log("Browser started - reinstalling context menus");
   registerContextMenus();
 });
 
-// Add this to handle the keyboard shortcut
+// For keyboard shortcut for analysis
 chrome.commands.onCommand.addListener((command) => {
   console.log("Command received:", command);
   if (command === "analyze-current-video") {
@@ -113,7 +110,7 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-// Replace your current notifyUser function with this one
+
 function notifyUser(tabId, type, message) {
   if (!tabId) {
     console.warn("Cannot notify - no valid tab ID");
@@ -123,42 +120,42 @@ function notifyUser(tabId, type, message) {
   sendMessageToTab(tabId, { action: "showNotification", type, message })
     .catch(error => {
       console.warn(`Notification to tab ${tabId} failed: ${error.message}`);
-      // We've already tried our best to handle this in sendMessageToTab
+    
     });
 }
 
-// Handle context menu clicks - FIXED VERSION
+// Handling context menu clicks 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   console.log("Menu clicked:", info.menuItemId); // Add logging for debugging
   
-  // Make sure tab exists before trying to access tab.id
+  // Making sure tab exists before trying to access tab.id
   if (!tab) {
     console.error("Tab is undefined in onClicked handler");
     return;
   }
   
-  // Simplified menu handler - just check for the menu ID we actually use
+  // Simplified menu handler 
   if (info.menuItemId === "analyze-media") {
     console.log("Analyzing media in tab:", tab.id);
     analyzeCurrentVideo(tab.id);
   }
 });
 
-// Improve background script message handling
+// Improving background script message handling
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  // Handle messages for video analysis
+  // Handling messages for video analysis
   if (msg.action === "analyzeCurrentVideo") {
-    // If we have a tabId in the message, use that
+   
     if (msg.tabId) {
       analyzeCurrentVideo(msg.tabId);
       sendResponse({success: true});
     } 
-    // If message comes from a tab, use that tab's ID
+  
     else if (sender && sender.tab && sender.tab.id) {
       analyzeCurrentVideo(sender.tab.id);
       sendResponse({success: true});
     } 
-    // Otherwise, query for the active tab
+    // Querying for the active tab for video element detection
     else {
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         if (tabs.length > 0) {
@@ -169,10 +166,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         }
       });
     }
-    return true; // Keep the message channel open for async response
+    return true; // Keeping the message channel open for async response
   }
   
-  // Handle history related messages
+  // Handling history related messages
   if (msg.action === "getHistory") {
     sendResponse({history: analysisHistory});
     return true;
@@ -185,17 +182,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Analyze current video with simplified approach (no tab capture)
+// Analyzing current video playing on web page
 function analyzeCurrentVideo(tabId) {
   console.log(`Analyzing video in tab ${tabId}`);
   
-  // Make sure we have a valid tab ID
+
   if (!tabId) {
     console.error("No valid tab ID for video analysis");
     return;
   }
   
-  // Show initial notification with better error handling
+  // Showing initial notification with better error handling
   sendMessageToTab(tabId, { 
     action: "showNotification", 
     type: "start", 
@@ -203,9 +200,9 @@ function analyzeCurrentVideo(tabId) {
   }).catch(error => {
     console.warn("Could not send initial notification, continuing anyway");
   }).finally(() => {
-    // Continue with analysis regardless of notification success
     
-    // Inject the capture script with proper error handling
+    
+    // Injecting  the capture script with proper error handling
     chrome.scripting.executeScript({
       target: { tabId: tabId },
       files: ['content-capture.js'],
@@ -214,7 +211,7 @@ function analyzeCurrentVideo(tabId) {
       return chrome.scripting.executeScript({
         target: { tabId: tabId },
         func: () => {
-          // Call the injected function
+          // Calling the injected function
           return window.captureVideoWithFallbacks?.() || { 
             error: "Capture function not available", 
             frames: [] 
@@ -243,7 +240,7 @@ function analyzeCurrentVideo(tabId) {
         return;
       }
       
-      // Process successful capture results
+      // Processing successful frame capture results
       processVideoFrames(tabId, captureData);
     })
     .catch(error => {
@@ -255,7 +252,7 @@ function analyzeCurrentVideo(tabId) {
 
 // Helper function to process video frames after successful capture
 function processVideoFrames(tabId, captureData) {
-  // Get tab URL for storing in history
+  // Getting tab URL for storing in history
   chrome.tabs.get(tabId, (tab) => {
     if (chrome.runtime.lastError) {
       console.error("Error getting tab info:", chrome.runtime.lastError);
@@ -277,7 +274,7 @@ function processVideoFrames(tabId, captureData) {
       method: captureData.method || "standard"
     };
     
-    // Create appropriate message based on capture method
+    // Creating appropriate message based on the capture method used 
     let frameCountMessage;
     if (captureData.method === "webrtc") {
       frameCountMessage = `Captured ${captureData.frames.length} frames using screen capture (WebRTC fallback mode)`;
@@ -290,24 +287,23 @@ function processVideoFrames(tabId, captureData) {
     console.log(frameCountMessage);
     notifyUser(tabId, "progress", frameCountMessage);
     
-    // Send frames to API for analysis
+    // Sending the frames to the API for analysis
     analyzeFrames(tabId, captureData.frames, videoDetails);
   });
 }
 
-// Send frames to API for analysis - fixed version
-// Optimized hybrid function to send frames with conditional batch processing
+// Function for sending frames to API for analysis 
 function analyzeFrames(tabId, frames, metadata) {
-  // Generate request ID
+
   const requestId = metadata.randomId;
   
-  // Start measuring time
+
   const startTime = performance.now();
   
-  // Show a notification about frame count
+  // Showing a notification about frame count
   notifyUser(tabId, "progress", `Processing ${frames.length} video frames...`);
   
-  // Check if we have enough frames for a good analysis
+  // Checking if we have enough frames for a good analysis
   if (frames.length < 10) {
     console.warn(`Only ${frames.length} frames captured - analysis may be less accurate`);
     notifyUser(tabId, "progress", `Note: Limited frames (${frames.length}) may affect accuracy`);
@@ -316,46 +312,46 @@ function analyzeFrames(tabId, frames, metadata) {
   }
   
   // ===== HYBRID APPROACH: THRESHOLD-BASED BATCH PROCESSING =====
-  // Configure batch processing parameters
-  const BATCH_THRESHOLD = 100; // Only use batches for videos with more than this many frames
-  const MAX_FRAMES_PER_BATCH = 200; // Maximum frames per batch (increased from original)
+  // Configuringbatch processing parameters
+  const BATCH_THRESHOLD = 100; // Only using batches for videos with more than this many frames
+  const MAX_FRAMES_PER_BATCH = 200; // Maximum frames per batch )
   
-  // Decide whether to use batch processing based on frame count
+  // Deciding whether to use batch processing based on frame count
   const useBatchProcessing = frames.length > BATCH_THRESHOLD;
   
   console.log(`Using ${useBatchProcessing ? 'batch' : 'single-request'} processing mode for ${frames.length} frames`);
   
-  // Prepare base metadata for API
+  // Preparing base metadata for API
   const baseRequestData = {
     id: requestId,
     timestamp: metadata.timestamp,
     dimensions: `${metadata.width}x${metadata.height}`,
     frameCount: frames.length,
     source: metadata.platform || 'unknown',
-    version: '1.2', // Track extension version for API compatibility
+    version: '1.2', // Tracking extension version for API compatibility
     facial_data: metadata.facialFrameCount !== undefined ? metadata.facialFrameCount : 0
   };
   
-  // If not using batch processing, send all frames at once (original behavior)
+  // If not using batch processing, send all frames at once 
   if (!useBatchProcessing) {
     sendFrameBatch(frames, baseRequestData, tabId, 1, 1);
     return;
   }
   
-  // For batch processing mode, determine optimal batch size
+  // Determining optimal batch size, For batch processing mode
   const batchSize = Math.min(MAX_FRAMES_PER_BATCH, Math.ceil(frames.length / 3));
   const numBatches = Math.ceil(frames.length / batchSize);
   
   console.log(`Batch processing: Sending ${frames.length} frames in ${numBatches} batches (batch size: ${batchSize})`);
   
-  // Initialize batch tracking
+  // Initializing batch tracking
   let currentBatch = 1;
   let processedResults = [];
   
   // Function to send the next batch
   const processNextBatch = () => {
     if (currentBatch > numBatches) {
-      // All batches processed, combine results
+      // Combining results from batch processing
       combineResults(processedResults, tabId, metadata);
       return;
     }
@@ -382,12 +378,11 @@ function analyzeFrames(tabId, frames, metadata) {
     );
   };
   
-  // Start processing batches
+  // Processing batches
   processNextBatch();
   
   // Function to send a single batch of frames
   function sendFrameBatch(batchFrames, requestData, tabId, batchNum, totalBatches, callback) {
-    // Clone the request data and add the frames
     const fullRequestData = {
       ...requestData,
       frames: batchFrames
@@ -395,11 +390,11 @@ function analyzeFrames(tabId, frames, metadata) {
     
     console.log(`Sending ${totalBatches > 1 ? `batch ${batchNum}/${totalBatches} with ` : ''}${batchFrames.length} frames to API`);
     
-    // Add timeout for the API request
+    // Adding timeout for the API request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
-    // Send to API with explicit no-cache headers
+    // Sending frames  to API with explicit no-cache headers
     fetch(API_URL + '/frames', {
       method: 'POST',
       headers: {
@@ -418,7 +413,7 @@ function analyzeFrames(tabId, frames, metadata) {
         const errorMsg = `API error: ${response.status}`;
         console.error(errorMsg);
         
-        // Check for specific status codes
+        // Checking for specific status codes response from API
         if (response.status === 413) {
           throw new Error("Request too large. Try analyzing a shorter video segment.");
         } else if (response.status === 429) {
@@ -434,12 +429,12 @@ function analyzeFrames(tabId, frames, metadata) {
     .then(result => {
       console.log(`API response ${totalBatches > 1 ? `for batch ${batchNum}/${totalBatches}` : ''}:`, result);
       
-      // If this is the only batch or the last one, show the result directly
+     
       if (totalBatches === 1) {
-        // Calculate total processing time
+        // Calculating the  total processing time
         const totalTime = Math.round(performance.now() - startTime);
         
-        // Validate and normalize the result
+        // Validating  and normalizing the result
         const validatedResult = {
           deepfake: result.deepfake === true,
           confidence: parseFloat(result.confidence) || 0.5,
@@ -449,21 +444,21 @@ function analyzeFrames(tabId, frames, metadata) {
           requestId: requestData.id,
           framesSent: batchFrames.length,
           frameTimes: metadata?.capturePositions || [],
-          // Add timing information
+          // Adding timing information
           processingTime: totalTime,
           clientProcessingTime: totalTime,
           apiResponseTime: result.processing_time_ms || result.processing_time || 0
         };
         
-        // Additional verification to ensure we got a valid result
+        // Additional verification to ensure valid result
         if (validatedResult.frames_analyzed === 0) {
           throw new Error("The API didn't analyze any frames. Please try again.");
         }
         
-        // Show result
+        // Showing the  result
         showAnalysisResult(tabId, validatedResult, metadata);
       } else {
-        // For multi-batch processing, call the callback with the result
+    
         if (callback) callback(result);
       }
     })
@@ -471,7 +466,7 @@ function analyzeFrames(tabId, frames, metadata) {
       clearTimeout(timeoutId);
       console.error(`API request failed ${totalBatches > 1 ? `for batch ${batchNum}/${totalBatches}` : ''}:`, error);
       
-      // Create user-friendly error message
+      // Creating a user-friendly error message
       let errorMessage = "Analysis failed";
       
       if (error.name === 'AbortError') {
@@ -480,12 +475,12 @@ function analyzeFrames(tabId, frames, metadata) {
         errorMessage = `${errorMessage}: ${error.message}`;
       }
       
-      // Only show error to user if this is the only batch or if we haven't started processing batches yet
+      // Only showing error to user if this is the only batch or if we haven't started processing batches yet
       if (totalBatches === 1 || batchNum === 1) {
         notifyUser(tabId, "error", errorMessage);
       }
       
-      // Call callback with error result
+    
       if (callback) callback({ error: errorMessage });
     });
   }
@@ -494,19 +489,19 @@ function analyzeFrames(tabId, frames, metadata) {
   function combineResults(results, tabId, metadata) {
     console.log(`Combining results from ${results.length} batches`);
     
-    // Handle case where we have no valid results
+    // Handling the case where we have no valid results
     if (results.length === 0) {
       notifyUser(tabId, "error", "Analysis failed: No valid results received from any batch");
       return;
     }
     
-    // Calculate combined metrics
+    // Calculating combined metrics
     let totalFramesAnalyzed = 0;
     let totalDeepfakeFrames = 0;
     let totalConfidenceSum = 0;
     let hasDeepfake = false;
     
-    // Process each batch result
+    // Processing each batch result
     results.forEach(result => {
       const framesAnalyzed = parseInt(result.frames_analyzed) || 0;
       const deepfakeFrames = parseInt(result.deepfake_frames) || 0;
@@ -514,22 +509,22 @@ function analyzeFrames(tabId, frames, metadata) {
       
       totalFramesAnalyzed += framesAnalyzed;
       totalDeepfakeFrames += deepfakeFrames;
-      totalConfidenceSum += confidence * framesAnalyzed; // Weight by frames analyzed
+      totalConfidenceSum += confidence * framesAnalyzed; 
       
-      // If any batch detected deepfake with high confidence, mark as deepfake
+      // If any batch detected deepfake with high confidence, it is marked as deepfake
       if (result.deepfake === true && confidence > 0.6) {
         hasDeepfake = true;
       }
     });
     
-    // Determine final deepfake status based on proportion and confidence
+    // Determining final deepfake status based on proportion and confidence
     const deepfakeRatio = totalFramesAnalyzed > 0 ? totalDeepfakeFrames / totalFramesAnalyzed : 0;
     const averageConfidence = totalFramesAnalyzed > 0 ? totalConfidenceSum / totalFramesAnalyzed : 0.5;
     
-    // Final decision logic - tuned to reduce false positives
+    // Final decision logic 
     let finalDeepfakeStatus;
     if (hasDeepfake) {
-      // If any batch had high confidence deepfake, trust that result
+      // If any batch had high confidence deepfake, result is final
       finalDeepfakeStatus = true;
     } else if (deepfakeRatio >= 0.25) {
       // If a significant portion of frames were detected as deepfake
@@ -541,7 +536,7 @@ function analyzeFrames(tabId, frames, metadata) {
     
     console.log(`Combined analysis: ${deepfakeRatio.toFixed(4)} deepfake ratio (${totalDeepfakeFrames}/${totalFramesAnalyzed}), ${averageConfidence.toFixed(4)} avg confidence`);
     
-    // Prepare the combined result
+    // Preparing the combined result
     const combinedResult = {
       deepfake: finalDeepfakeStatus,
       confidence: averageConfidence,
@@ -554,12 +549,12 @@ function analyzeFrames(tabId, frames, metadata) {
       batches: results.length
     };
     
-    // Show the combined result
+    // Showing the combined result to the user 
     showAnalysisResult(tabId, combinedResult, metadata);
   }
 }
 
-// Show analysis result
+// Showing the analysis result
 function showAnalysisResult(tabId, result, metadata) {
     console.log("Showing analysis result:", result);
 
@@ -568,7 +563,7 @@ function showAnalysisResult(tabId, result, metadata) {
       result: result
     });
     
-    // Save to history
+    // Saving the results to history tab for the user to view
     const historyEntry = {
       id: result.requestId,
       date: new Date().toISOString(),
@@ -577,13 +572,13 @@ function showAnalysisResult(tabId, result, metadata) {
       result: result
     };
     
-    // Add to history
+    // Adding to history tab
     analysisHistory.unshift(historyEntry);
     if (analysisHistory.length > 50) {
       analysisHistory = analysisHistory.slice(0, 50);
     }
     
-    // Save to storage
+    // Saving to browserstorage
     chrome.storage.local.set({analysisHistory: analysisHistory});
 }
 

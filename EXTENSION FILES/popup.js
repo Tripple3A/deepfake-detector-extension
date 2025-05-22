@@ -1,23 +1,23 @@
 // DeepFake Detector Popup Script
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab navigation
+    // For Tab navigation
     setupTabs();
     
-    // URL analysis
+    // For URL analysis
     setupUrlAnalysis();
     
-    // History
+    // For loading History content on the tab
     loadHistory();
     
-    // Clear history
+    // Clearing user history of analyzed videos
     document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
     
-    // Check current tab for videos
+    // Checking the  current tab for videos
     checkCurrentTabForVideos();
   });
   
-  // Set up tab navigation
+  // Setting up tab navigation
   function setupTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -36,22 +36,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Check if the current tab has videos
+  // Checking if the current tab has videos
   function checkCurrentTabForVideos() {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       if (tabs.length === 0) return;
       
       const currentTab = tabs[0];
       
-      // Check if this is a known video platform
+      // Checking if this is a known video platform
       const platform = detectPlatform(currentTab.url);
       
-      // Always show the analyze current video button
+     
       const quickAnalyzeSection = document.querySelector('.quick-analyze');
       const platformMessage = document.createElement('div');
       platformMessage.className = 'platform-detected';
       
-      // Generate message based on platform
+      // Generating message based on platform
       const platformText = platform !== 'generic' ? 
         `This appears to be a ${capitalizeFirstLetter(platform)} page.` : 
         'You can analyze videos on this page.';
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button id="analyze-current-btn" class="primary-button">Analyze Current Video</button>
       `;
       
-      // Insert before the OR divider
+
       const orDivider = quickAnalyzeSection.querySelector('.or-divider');
       if (orDivider) {
         quickAnalyzeSection.insertBefore(platformMessage, orDivider);
@@ -69,23 +69,23 @@ document.addEventListener('DOMContentLoaded', function() {
         quickAnalyzeSection.appendChild(platformMessage);
       }
       
-      // Add click handler
+      // Adding click handler
       document.getElementById('analyze-current-btn').addEventListener('click', () => {
-        // Show analyzing message
+        // Showing analyzing message (notification)
         platformMessage.innerHTML = '<p>Analyzing current video... Check the page for results.</p>';
         
-        // Send message to analyze the current tab's video
+        // Sending message to analyze the current tab's video
         chrome.tabs.sendMessage(currentTab.id, {
           action: "analyzeCurrentVideo"
         }).catch(error => {
-          // If content script isn't ready, send to background script directly
+          // If content script isn't ready, sending the message to background script directly
           chrome.runtime.sendMessage({
             action: "analyzeCurrentVideo",
             tabId: currentTab.id
           });
         });
         
-        // Close popup after a delay
+        // Closing the popup after a delay
         setTimeout(() => {
           window.close();
         }, 2000);
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Set up URL analysis functionality
+  // Setting up URL analysis functionality
   function setupUrlAnalysis() {
     const urlInput = document.getElementById('video-url');
     const analyzeBtn = document.getElementById('analyze-url-btn');
@@ -107,21 +107,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // Check if URL is valid
+      // Checking if URL is valid
       if (!isValidUrl(url)) {
         showUrlAnalysisResult('error', 'Please enter a valid URL');
         return;
       }
       
-      // Disable button and show loading
+      // Loading the disable button
       analyzeBtn.disabled = true;
       showUrlAnalysisResult('pending', 'Analyzing video...');
       
-      // Get current tab ID
+      // Getting current tab ID
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         const tabId = tabs[0].id;
         
-        // Send analysis request to background script
+        // Sending analysis request to background script
         chrome.runtime.sendMessage({
           action: "analyzeUrl",
           videoUrl: url,
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (response.success) {
             showUrlAnalysisResult('pending', 'Analysis started! Check the page for results.');
             
-            // Keep disabled for a while
+       
             setTimeout(() => {
               analyzeBtn.disabled = false;
               urlInput.value = "";
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
-    // Add enter key support
+    // Adding enter key support for analysis
     urlInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !analyzeBtn.disabled) {
         analyzeBtn.click();
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Show URL analysis result
+  // Showing URL analysis result
   function showUrlAnalysisResult(type, message) {
     const resultContainer = document.getElementById('url-analysis-result');
     
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
     resultContainer.innerHTML = html;
   }
   
-  // Load analysis history
+  // Loading analysis history
   function loadHistory() {
     const historyList = document.getElementById('history-list');
     
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // Generate history items
+      // Generating history items
       let html = '';
       
       history.forEach(item => {
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       historyList.innerHTML = html;
       
-      // Add click handlers for URLs
+      // Adding click handlers for URLs
       const urlElements = historyList.querySelectorAll('.history-url');
       urlElements.forEach(el => {
         el.addEventListener('click', () => {
@@ -252,20 +252,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Clear analysis history
+  // Clearing analysis history
   function clearHistory() {
     if (confirm('Are you sure you want to clear all analysis history?')) {
       chrome.runtime.sendMessage({action: "clearHistory"}, function(response) {
         if (response && response.success) {
-          loadHistory(); // Reload history (will show empty)
+          loadHistory(); // Reloading the history tab (contains previously analyzed videos)
         }
       });
     }
   }
   
-  // Helper Functions
+
   
-  // Check if URL is valid
+  // Checking if URL is valid
   function isValidUrl(string) {
     try {
       new URL(string);
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Detect platform from URL
+  // Detecting platform from URL
   function detectPlatform(url) {
     try {
       const urlObj = new URL(url);
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Format date for display
+  // Formatting date for display
   function formatDate(date) {
     const now = new Date();
     const diffMs = now - date;
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Truncate URL for display
+  // Truncating URL for display
   function truncateUrl(url) {
     try {
       const urlObj = new URL(url);
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Capitalize first letter
+
   function capitalizeFirstLetter(string) {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1);
