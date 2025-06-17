@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Deepfake Detector",
+  "version": "1.0.1",
+  "description": "Detect deepfake videos across the web. Right-click any video to analyze it for manipulation.",
+  "permissions": [
+    "contextMenus",
+    "desktopCapture",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabCapture"
+  ],
+  "host_permissions": [
+    "https://deepfake-detector-106176227689.us-central1.run.app/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["popup.css", "styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content-capture.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.jpg",
+      "128": "icon48.jpg"
+    }
+  },
+  "commands": {
+    "analyze-current-video": {
+      "suggested_key": {
+        "default": "Alt+Shift+F",
+        "mac": "Alt+Shift+F"
+      },
+      "description": "Analyze current video for deepfakes"
+    }
+  }
+}

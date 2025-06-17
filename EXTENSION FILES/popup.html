@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DeepFake Detector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="icon48.jpg" alt="DeepFake Detector Logo" class="logo">
+      <h1>DeepFake Detector</h1>
+    </div>
+    
+    <div class="tab-nav">
+      <button class="tab-button active" data-tab="main">Home</button>
+      <button class="tab-button" data-tab="history">History</button>
+      <button class="tab-button" data-tab="about">About</button>
+    </div>
+    
+    <div id="main-tab" class="tab-content active">
+      <div class="quick-analyze">
+        <h2>Analyze Video</h2>
+        <p>Right-click on any video and select <strong>"Check for Deepfake"</strong> to analyze it.</p>
+        
+        <div class="or-divider">
+          <span>OR</span>
+        </div>
+        
+        <h3>Analyze by URL</h3>
+        <div class="url-form">
+          <input type="text" id="video-url" placeholder="Paste a direct video URL here">
+          <button id="analyze-url-btn" class="primary-button">Analyze</button>
+        </div>
+        
+        <div id="url-analysis-result"></div>
+      </div>
+      
+      <div class="platform-section">
+        <h2>Supported Platforms</h2>
+        <div class="platform-list">
+          <div class="platform-item">
+            <div class="platform-icon youtube"></div>
+            <div class="platform-name">YouTube</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-icon facebook"></div>
+            <div class="platform-name">Facebook</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-icon twitter"></div>
+            <div class="platform-name">Twitter</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-icon instagram"></div>
+            <div class="platform-name">Instagram</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="history-tab" class="tab-content">
+      <h2>Analysis History</h2>
+      <div id="history-list" class="history-list">
+        <div class="loading-message">Loading history...</div>
+      </div>
+      <button id="clear-history-btn" class="secondary-button">Clear History</button>
+    </div>
+    
+    <div id="about-tab" class="tab-content">
+      <h2>About DeepFake Detector</h2>
+      <p>DeepFake Detector helps you identify manipulated videos across the web.</p>
+      
+      <h3>How to use</h3>
+      <ol>
+        <li>Find a video you want to analyze</li>
+        <li>Right-click on the video</li>
+        <li>Select "Check for Deepfake" from the menu</li>
+        <li>View the analysis results</li>
+      </ol>
+      
+      <h3>Understanding Results</h3>
+      <p>Our AI model analyzes videos frame-by-frame to detect signs of manipulation. The confidence score indicates how certain the system is about the detection:</p>
+      
+      <div class="result-example deepfake">
+        <div class="example-icon">⚠️</div>
+        <div class="example-text">
+          <strong>Deepfake Detected</strong>
+          <div class="example-description">High confidence that the video has been manipulated</div>
+        </div>
+      </div>
+      
+      <div class="result-example authentic">
+        <div class="example-icon">✓</div>
+        <div class="example-text">
+          <strong>Authentic Video</strong>
+          <div class="example-description">No significant signs of manipulation detected</div>
+        </div>
+      </div>
+      
+      <p class="disclaimer">Note: No AI system is perfect. Always use critical thinking when evaluating content.</p>
+    </div>
+    
+    <div class="footer">
+      <p>Powered by deepfake detection AI</p>
+      <p class="version">v1.0</p>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
